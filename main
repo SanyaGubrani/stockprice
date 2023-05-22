@@ -1,67 +1,55 @@
 import yfinance as yf
 from forex_python.converter import CurrencyCodes
 import matplotlib.pyplot as plt
+from requests.exceptions import HTTPError
 
 stock = input("Enter the stock symbol: ").upper()
 
-ticker = yf.Ticker(stock).info
+try:
+    ticker = yf.Ticker(stock).info
 
-#Function to convert market capital to milions(M),billions(B),trillions(T) with currency symbol
-#to make it readable:
-def convert_market_cap(market_cap, currency_symbol):
+    def convert_market_cap(market_cap, currency_symbol):
+        if market_cap < 1_000_000_000:
+            return f"{currency_symbol}{market_cap / 1_000_000:.2f}M"
+        elif market_cap < 1_000_000_000_000:
+            return f"{currency_symbol}{market_cap / 1_000_000_000:.2f}B"
+        else:
+            return f"{currency_symbol}{market_cap / 1_000_000_000_000:.2f}T"
 
-    if market_cap < 1_000_000_000:
-        return f"{currency_symbol}{market_cap / 1_000_000:.2f}M"
-    
-    elif market_cap < 1_000_000_000_000:
-        return f"{currency_symbol}{market_cap / 1_000_000_000:.2f}B"
-    
-    else:
-        return f"{currency_symbol}{market_cap / 1_000_000_000_000:.2f}T"
-    
-
-def stockinfo():
-
-    try:
-
-        #Retrieving relevant stock information
+    def stockinfo():
         market_price = ticker['currentPrice']
         previous_day_close = ticker['regularMarketPreviousClose']
-
         company_name = ticker['longName']
         sector = ticker['sector']
         market_cap = ticker['marketCap']
-
-        # Get currency symbol for formatting
         currency_name = ticker['currency']
+
         currency_codes = CurrencyCodes()
         currency_symbol = currency_codes.get_symbol(currency_name)
-    
+
         print(f'Ticker: {stock}')
         print('Company Name:', company_name)
         print('Sector:', sector)
         print('Market Cap:', convert_market_cap(market_cap, currency_symbol))
-        print('Current Market Price:', f"{currency_symbol}{market_price:,.2f}")  
+        print('Current Market Price:', f"{currency_symbol}{market_price:,.2f}")
         print('Previous Day Close Price:', f"{currency_symbol}{previous_day_close:,.2f}")
-       
-
-    except KeyError:
-
-        print("Invalid stock symbol or data not available.")
-
-stockinfo()
 
 
-#Plotting the closing price history (5 years, interval:1 month) of the stock:
-price_history = yf.Ticker(stock).history(period='5y', interval='1mo', actions=False)
+    price_history = yf.Ticker(stock).history(period='5y', interval='1mo', actions=False)
 
-close_prices = price_history['Close'] 
+    close_prices = price_history['Close']
 
-plt.plot(close_prices)
-plt.title(f"{stock} Price History")
-plt.xlabel("Date")
-plt.ylabel("Closing Price")
-plt.show() 
+    plt.plot(close_prices)
+    plt.title(f"{stock} Price History")
+    plt.xlabel("Date")
+    plt.ylabel("Closing Price")
+    plt.show()
+
+
+    stockinfo()
+
+except HTTPError:
+    print(f"Invalid stock symbol or data not available for {stock}")
 
 
 
