@@ -17,6 +17,7 @@ try:
             return f"{currency_symbol}{market_cap / 1_000_000_000_000:.2f}T"
 
     def stockinfo():
+        
         market_price = ticker['currentPrice']
         previous_day_close = ticker['regularMarketPreviousClose']
         company_name = ticker['longName']
@@ -35,15 +36,15 @@ try:
         print('Previous Day Close Price:', f"{currency_symbol}{previous_day_close:,.2f}")
 
 
-    price_history = yf.Ticker(stock).history(period='5y', interval='1mo', actions=False)
+        price_history = yf.Ticker(stock).history(period='5y', interval='1mo', actions=False)
 
-    close_prices = price_history['Close']
+        close_prices = price_history['Close']
 
-    plt.plot(close_prices)
-    plt.title(f"{stock} Price History")
-    plt.xlabel("Date")
-    plt.ylabel("Closing Price")
-    plt.show()
+        plt.plot(close_prices)
+        plt.title(f"{stock} Price History")
+        plt.xlabel("Date")
+        plt.ylabel("Closing Price")
+        plt.show()
 
 
     stockinfo()
